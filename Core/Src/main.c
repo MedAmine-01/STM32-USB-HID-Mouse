@@ -65,7 +65,7 @@ int8_t power_map(int32_t input, int32_t in_min, int32_t in_max, int32_t out_extr
 /* USER CODE BEGIN 0 */
 
 int8_t x,y;
-float test;
+uint8_t pressed=0;
 
 
 /* USER CODE END 0 */
@@ -111,8 +111,15 @@ int main(void)
   while (1)
   {
 
-	  	 x=power_map(adc_values[0], 0, 4040, 127);
-	  	 y=power_map(adc_values[1], 0, 4040, 127);
+	  	 x=power_map(adc_values[0], 0, 4040, 10);
+	  	 y=power_map(adc_values[1], 0, 4040, 10);
+	  	 pressed = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2)==GPIO_PIN_SET)?0:1;
+	  	 if(pressed){
+	  		 buffer[0]=(1<<0);
+	  	 }
+	  	 else {
+	  		 buffer[0]=0;
+	  	 }
 	  	 buffer[1]= x;
 	  	 buffer[2]= y;
 	  	 USBD_HID_SendReport(&hUsbDeviceFS,  buffer, 4);
@@ -263,12 +270,19 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin : PA2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -285,7 +299,7 @@ int8_t power_map(int32_t input, int32_t in_min, int32_t in_max, int32_t out_extr
     if (normalized<0){
     	sign=-1;
     }
-    return (int8_t)sign*out_extreme*pow(fabs(normalized),3);
+    return (int8_t)sign*out_extreme*pow(fabs(normalized),1);
 }
 /* USER CODE END 4 */
 
